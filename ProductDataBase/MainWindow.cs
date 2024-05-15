@@ -360,8 +360,15 @@ namespace ProductDatabase {
             try {
                 ResetFieldsForCodeScan();
 
-                string[]? _arr = ParseQRCodeInput() ?? throw new Exception("QRコード入力に誤りがあります。");
-                FetchDataFromDatabase(_arr);
+                if (QRCodeCheckBox.Checked) {
+                    ParseQRCodeInput();
+                }
+                else {
+                    BarcodeInput();
+                }
+
+                ProcessCategoryItemData();
+                FetchDataFromSQLite();
 
                 if (ListCategory11.Count >= 2) {
                     ShowDialogWindowForMultipleItems();
@@ -386,40 +393,34 @@ namespace ProductDatabase {
             ListCategory14.Clear();
             Enabled = false;
         }
-        private string[]? ParseQRCodeInput() {
-            if (QRCodeCheckBox.Checked) {
-                return QRCodeTextBox.Text.Split(new string[] { "//" }, StringSplitOptions.None);
-            }
-            else {
-                using (OdbcConnection _con = new("DSN=DSN_NAME; UID=USER_ID; PWD=REMOVED")) {
-                    _con.Open();
-                    using OdbcCommand _cmd = new($"SELECT * FROM V_宮崎手配情報 WHERE 手配管理番号 = '{QRCodeTextBox.Text}'", _con);
-                    using OdbcDataReader _dr = _cmd.ExecuteReader();
-                    while (_dr.Read()) {
-                        StrExtSys1 = _dr["手配製番"].ToString() ?? string.Empty;
-                        StrExtSys2 = _dr["品目番号"].ToString() ?? string.Empty;
-                        StrExtSys3 = _dr["品目名称"].ToString() ?? string.Empty;
-                        StrExtSys4 = Convert.ToInt32(_dr["手配数"]);
-                        StrExtSys5 = _dr["請求先注番"].ToString() ?? string.Empty;
-                    }
+        private void ParseQRCodeInput() {
+            try {
+                string[] _arr = QRCodeTextBox.Text.Split(new string[] { "//" }, StringSplitOptions.None);
+                if (_arr.Length != 4) { throw new Exception("QRコードに誤りがあります。"); }
+                if (_arr != null) {
+                    StrExtSys1 = _arr[0];
+                    StrExtSys2 = _arr[1];
+                    StrExtSys4 = Convert.ToInt32(_arr[2]);
+                    StrExtSys5 = _arr[3];
                 }
-
-                if (string.IsNullOrEmpty(StrExtSys1)) { throw new Exception($"一致する情報がありません。{Environment.NewLine}手配製番:{StrExtSys1}"); }
-                return null;
+            } catch (Exception ex) {
+                throw new Exception($"{ex.Message}");
             }
         }
-        private void FetchDataFromDatabase(string[] arr) {
-            if (arr != null) {
-                ProcessQRCodeInput(arr);
+        private void BarcodeInput() {
+            using (OdbcConnection _con = new("DSN=DSN_NAME; UID=USER_ID; PWD=REMOVED")) {
+                _con.Open();
+                using OdbcCommand _cmd = new($"SELECT * FROM V_宮崎手配情報 WHERE 手配管理番号 = '{QRCodeTextBox.Text}'", _con);
+                using OdbcDataReader _dr = _cmd.ExecuteReader();
+                while (_dr.Read()) {
+                    StrExtSys1 = _dr["手配製番"].ToString() ?? string.Empty;
+                    StrExtSys2 = _dr["品目番号"].ToString() ?? string.Empty;
+                    StrExtSys3 = _dr["品目名称"].ToString() ?? string.Empty;
+                    StrExtSys4 = Convert.ToInt32(_dr["手配数"]);
+                    StrExtSys5 = _dr["請求先注番"].ToString() ?? string.Empty;
+                }
             }
-
-            ProcessCategoryItemData();
-        }
-        private void ProcessQRCodeInput(string[] arr) {
-            StrExtSys1 = arr[0];
-            StrExtSys2 = arr[1];
-            StrExtSys4 = Convert.ToInt32(arr[2]);
-            StrExtSys5 = arr[3];
+            if (string.IsNullOrEmpty(StrExtSys1)) { throw new Exception($"一致する情報がありません。{Environment.NewLine}手配製番:{StrExtSys1}"); }
         }
         private void ProcessCategoryItemData() {
             StrExtSys2 = StrExtSys2.Replace("-SMT", "")
@@ -427,15 +428,15 @@ namespace ProductDatabase {
                                      .Replace("-GH", "")
                                      .Replace("-ACGH", "-AC")
                                      .Replace("-DCGH", "-DC");
-
-            FetchDataFromSQLite();
         }
         private void FetchDataFromSQLite() {
             using SQLiteConnection _con = new(GetConnectionString1());
             _con.Open();
             using SQLiteCommand _cmd = _con.CreateCommand();
-            _cmd.CommandText = $"SELECT * FROM V_ItemList WHERE col_ItemNumber = '{StrExtSys2}' OR 'col_ItemNumber:1' = '{StrExtSys2}'";
+            _cmd.CommandText = $"SELECT * FROM V_ItemList WHERE col_ItemNumber = '@StrExtSys2' OR 'col_ItemNumber:1' = '@StrExtSys2'";
+            _cmd.Parameters.AddWithValue("@StrExtSys2", StrExtSys2);
             using SQLiteDataReader _dr = _cmd.ExecuteReader();
+            if (!_dr.HasRows) { throw new Exception($"品目番号が見つかりません。"); }
             while (_dr.Read()) {
                 string _colItemNumber = _dr["col_ItemNumber"].ToString() ?? string.Empty;
                 string _colItemNumber1 = _dr["col_ItemNumber:1"].ToString() ?? string.Empty;
@@ -510,6 +511,9 @@ namespace ProductDatabase {
             _window.IntRegType = Convert.ToInt32(substrateRet[0]["col_Reg_Type"]);
             _window.IntPrintType = Convert.ToInt32(substrateRet[0]["col_Print_Type"]);
             _window.IntCheckBin = Convert.ToInt32(substrateRet[0]["col_Checkbox"].ToString(), 2);
+            _window.StrExtSys1 = StrExtSys1;
+            _window.StrExtSys4 = StrExtSys4;
+            _window.StrExtSys5 = StrExtSys5;
             _window.ShowDialog(this);
         }
         private void HandleProductSelection() {
@@ -535,6 +539,9 @@ namespace ProductDatabase {
             _window.IntPrintType = Convert.ToInt32(productRet[0]["col_Print_Type"]);
             _window.IntCheckBin = Convert.ToInt32(productRet[0]["col_Checkbox"].ToString(), 2);
             _window.IntSerialDigit = Convert.ToInt32(productRet[0]["col_Serial_Digit"]);
+            _window.StrExtSys1 = StrExtSys1;
+            _window.StrExtSys4 = StrExtSys4;
+            _window.StrExtSys5 = StrExtSys5;
             _window.ShowDialog(this);
         }
         private void CleanupAfterScan() {
