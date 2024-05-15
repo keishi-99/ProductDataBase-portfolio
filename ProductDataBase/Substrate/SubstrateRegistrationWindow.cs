@@ -53,7 +53,7 @@ namespace ProductDatabase {
 
                 OrderNumberTextBox.Text = StrExtSys5;
                 ManufacturingNumberMaskedTextBox.Text = !string.IsNullOrEmpty(StrExtSys1) ? StrExtSys1 : ManufacturingNumberMaskedTextBox.Text;
-                QuantityTextBox.Text = StrExtSys4.ToString();
+                QuantityTextBox.Text = (StrExtSys4 != 0) ? StrExtSys4.ToString() : string.Empty;
 
                 RegisterButton.Enabled = true;
 
