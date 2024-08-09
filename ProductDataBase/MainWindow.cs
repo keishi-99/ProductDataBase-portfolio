@@ -479,13 +479,13 @@ namespace ProductDatabase {
             using SQLiteConnection con = new(GetConnectionString1());
             con.Open();
             using var cmd = con.CreateCommand();
-            cmd.CommandText = $"SELECT * FROM V_ItemList WHERE col_ItemNumber = @StrExtSys2 OR 'col_ItemNumber:1' = @StrExtSys2";
+            cmd.CommandText = $"SELECT * FROM V_ItemList WHERE col_SubItemNumber = @StrExtSys2 OR col_ProItemNumber = @StrExtSys2";
             cmd.Parameters.Add("@StrExtSys2", DbType.String).Value = ProductInfo.ExtSys2;
             using var dr = cmd.ExecuteReader();
-            if (!dr.HasRows) { throw new Exception($"品目番号が見つかりません。\n品目番号:[{ProductInfo.ExtSys2}"); }
+            if (!dr.HasRows) { throw new Exception($"品目番号が見つかりません。\n品目番号:[{ProductInfo.ExtSys2}]"); }
             while (dr.Read()) {
-                var colItemNumber = dr["col_ItemNumber"].ToString() ?? string.Empty;
-                var colItemNumber1 = dr["col_ItemNumber:1"].ToString() ?? string.Empty;
+                var colItemNumber = dr["col_SubItemNumber"].ToString() ?? string.Empty;
+                var colItemNumber1 = dr["col_ProItemNumber"].ToString() ?? string.Empty;
 
                 if (!string.IsNullOrEmpty(colItemNumber)) {
                     var substrateName = dr["col_Substrate_Name"]?.ToString() ?? string.Empty;
