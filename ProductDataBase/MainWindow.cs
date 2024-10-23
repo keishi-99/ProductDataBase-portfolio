@@ -295,19 +295,19 @@ namespace ProductDatabase {
                 switch (selectedRadioButton.Tag) {
                     case "1":
                         ProductInfo.RadioButtonFlg = 1;
-                        strSqlQuery = @"SELECT * FROM Substrate WHERE Visible = ""1"";";
+                        strSqlQuery = """SELECT * FROM Substrate WHERE Visible = "1";""";
                         break;
                     case "2":
                         ProductInfo.RadioButtonFlg = 2;
-                        strSqlQuery = @"SELECT * FROM Product WHERE Visible = ""1"";";
+                        strSqlQuery = """SELECT * FROM Product WHERE Visible = "1";""";
                         break;
                     case "3":
                         ProductInfo.RadioButtonFlg = 3;
-                        strSqlQuery = @"SELECT * FROM Product WHERE Visible = ""1"";";
+                        strSqlQuery = """SELECT * FROM Product WHERE Visible = "1";""";
                         break;
                     case "4":
                         ProductInfo.RadioButtonFlg = 4;
-                        strSqlQuery = @"SELECT * FROM Product WHERE Visible = ""1"" AND (col_Print_Type = ""5"" OR col_Print_Type = ""6"");";
+                        strSqlQuery = """SELECT * FROM Product WHERE Visible = "1" AND (col_Print_Type = "5" OR col_Print_Type = "6");""";
                         break;
                     default:
                         break;
@@ -474,7 +474,7 @@ namespace ProductDatabase {
         private void BarcodeInput() {
             using (OdbcConnection con = new("DSN=DSN_NAME; UID=USER_ID; PWD=REMOVED")) {
                 con.Open();
-                using OdbcCommand cmd = new($@"SELECT * FROM V_宮崎手配情報 WHERE 手配管理番号 = ""{QRCodeTextBox.Text}""", con);
+                using OdbcCommand cmd = new($"""SELECT * FROM V_宮崎手配情報 WHERE 手配管理番号 = "{QRCodeTextBox.Text}" """, con);
                 using var dr = cmd.ExecuteReader();
                 while (dr.Read()) {
                     ProductInfo.ExtSys1 = dr["手配製番"].ToString() ?? String.Empty;
@@ -498,7 +498,7 @@ namespace ProductDatabase {
             using SQLiteConnection con = new(GetConnectionString1());
             con.Open();
             using var cmd = con.CreateCommand();
-            cmd.CommandText = $@"SELECT * FROM V_ItemList WHERE ""col_SubItemNumber"" = ""@StrExtSys2"" OR ""col_ProItemNumber"" = ""@StrExtSys2""";
+            cmd.CommandText = $"""SELECT * FROM V_ItemList WHERE col_SubItemNumber = @StrExtSys2 OR col_ProItemNumber = @StrExtSys2""";
             cmd.Parameters.Add("@StrExtSys2", DbType.String).Value = ProductInfo.ExtSys2;
             using var dr = cmd.ExecuteReader();
             if (!dr.HasRows) { throw new Exception($"品目番号が見つかりません。\n品目番号:[{ProductInfo.ExtSys2}]"); }
@@ -551,7 +551,7 @@ namespace ProductDatabase {
         }
         private void HandleSubstrateSelection() {
             using (SQLiteConnection con = new(GetConnectionString1())) {
-                using SQLiteDataAdapter adapter = new("SELECT * FROM Substrate;", con);
+                using SQLiteDataAdapter adapter = new("""SELECT * FROM Substrate;""", con);
                 adapter.Fill(ProductDataTable);
             }
 
@@ -573,7 +573,7 @@ namespace ProductDatabase {
         }
         private void HandleProductSelection() {
             using (SQLiteConnection con = new(GetConnectionString1())) {
-                using SQLiteDataAdapter adapter = new("SELECT * FROM Product;", con);
+                using SQLiteDataAdapter adapter = new("""SELECT * FROM Product;""", con);
                 adapter.Fill(ProductDataTable);
             }
 
