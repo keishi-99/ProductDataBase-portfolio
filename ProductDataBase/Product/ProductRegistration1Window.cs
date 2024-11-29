@@ -263,8 +263,32 @@ namespace ProductDatabase {
                 RegistrationDateMaskedTextBox.Focus();
             }
         }
+        // QR入力処理
+        private void QrInput() {
+            try {
+                if (string.IsNullOrWhiteSpace(QrCodeTextBox.Text)) { return; }
+                string[] separator = ["//"];
+                var arr = QrCodeTextBox.Text.Split(separator, StringSplitOptions.None);
+                if (arr.Length != 4) {
+                    MessageBox.Show("QRコードが正しくありません。");
+                    return;
+                }
+                if (arr != null) {
+                    ProductInfo.ExtSys1 = arr[0];
+                    ProductInfo.ExtSys2 = arr[1];
+                    ProductInfo.ExtSys4 = Convert.ToInt32(arr[2] ?? throw new Exception());
+                    ProductInfo.ExtSys5 = arr[3];
+                }
+                OrderNumberTextBox.Text = ProductInfo.ExtSys5;
+                ManufacturingNumberMaskedTextBox.Text = ProductInfo.ExtSys1;
+                QuantityTextBox.Text = ProductInfo.ExtSys4.ToString();
+            } catch (Exception ex) {
+                throw new Exception($"{ex.Message}");
+            }
+        }
 
         private void ProductRegistration1Window_Load(object sender, EventArgs e) { LoadEvents(); }
+        private void QrCodeButton_Click(object sender, EventArgs e) { QrInput(); }
         private void RegisterButton_Click(object sender, EventArgs e) { RegisterCheck(); }
         private void TemplateButton_Click(object sender, EventArgs e) { TemplateComment(); }
         private void NumberCheckBox_CheckedChanged(object sender, EventArgs e) { CheckBoxChecked(sender, e); }
