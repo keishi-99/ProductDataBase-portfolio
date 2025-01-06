@@ -617,13 +617,15 @@ namespace ProductDatabase {
             try {
                 string[] separator = ["//"];
                 var arr = QRCodeTextBox.Text.Split(separator, StringSplitOptions.None);
+                //if (arr.Length == 1) {
+                //    ProductInfo.ExtSys2 = QRCodeTextBox.Text;
+                //    return;
+                //}
                 if (arr.Length != 4) { throw new Exception("QRコードが正しくありません。"); }
-                if (arr != null) {
-                    ProductInfo.ExtSys1 = arr[0];
-                    ProductInfo.ExtSys2 = arr[1];
-                    ProductInfo.ExtSys4 = Convert.ToInt32(arr[2] ?? throw new Exception("arr[2] is null"));
-                    ProductInfo.ExtSys5 = arr[3];
-                }
+                ProductInfo.ExtSys1 = arr[0];
+                ProductInfo.ExtSys2 = arr[1];
+                ProductInfo.ExtSys4 = int.TryParse(arr[2], out var result) ? result : throw new Exception("数量に数値以外が入力されています。");
+                ProductInfo.ExtSys5 = arr[3];
             } catch (Exception ex) {
                 throw new Exception($"{System.Reflection.MethodBase.GetCurrentMethod()?.Name ?? "不明なメソッド"}]エラー{Environment.NewLine}{ex.Message}");
             }
