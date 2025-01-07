@@ -617,10 +617,10 @@ namespace ProductDatabase {
             try {
                 string[] separator = ["//"];
                 var arr = QRCodeTextBox.Text.Split(separator, StringSplitOptions.None);
-                //if (arr.Length == 1) {
-                //    ProductInfo.ExtSys2 = QRCodeTextBox.Text;
-                //    return;
-                //}
+                if (arr.Length == 1) {
+                    ProductInfo.ExtSys2 = QRCodeTextBox.Text;
+                    return;
+                }
                 if (arr.Length != 4) { throw new Exception("QRコードが正しくありません。"); }
                 ProductInfo.ExtSys1 = arr[0];
                 ProductInfo.ExtSys2 = arr[1];
@@ -657,7 +657,8 @@ namespace ProductDatabase {
             using SQLiteConnection con = new(GetConnectionInformation());
             con.Open();
             using var cmd = con.CreateCommand();
-            cmd.CommandText = $"""SELECT * FROM V_ItemList WHERE SubItemNumber = @StrExtSys2 OR ProItemNumber = @StrExtSys2""";
+            cmd.CommandText = $"""SELECT * FROM V_ItemList WHERE SubItemNumber LIKE '%'|| @StrExtSys2 ||'%' OR ProItemNumber LIKE '%'|| @StrExtSys2 ||'%'""";
+            //cmd.CommandText = $"""SELECT * FROM V_ItemList WHERE SubItemNumber = @StrExtSys2 OR ProItemNumber = @StrExtSys2""";
             cmd.Parameters.Add("@StrExtSys2", DbType.String).Value = ProductInfo.ExtSys2;
             using var dr = cmd.ExecuteReader();
             if (!dr.HasRows) { throw new Exception($"品目番号が見つかりません。\n品目番号:[{ProductInfo.ExtSys2}]"); }
