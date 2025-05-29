@@ -121,8 +121,9 @@ namespace ProductDatabase {
                 ExtSys4 = 0;
                 ExtSys5 = string.Empty;
                 CategoryItemNumber = [];
-                CategoryProductType = [];
                 CategoryProductName = [];
+                CategoryProductType = [];
+                CategorySubstrateName = [];
                 CategoryType = [];
                 OrderNumber = string.Empty;
                 ProductNumber = string.Empty;
