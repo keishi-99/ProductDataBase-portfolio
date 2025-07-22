@@ -427,19 +427,19 @@ namespace ProductDatabase {
                 switch (selectedRadioButton.Tag) {
                     case "1":
                         ProductInfo.RadioButtonFlg = 1;
-                        strSqlQuery = """SELECT * FROM Substrate WHERE Visible = 1 ORDER BY SortNumber ASC;""";
+                        strSqlQuery = "SELECT * FROM Substrate WHERE Visible = 1 ORDER BY SortNumber ASC;";
                         break;
                     case "2":
                         ProductInfo.RadioButtonFlg = 2;
-                        strSqlQuery = """SELECT * FROM Product WHERE Visible = 1 ORDER BY SortNumber ASC;""";
+                        strSqlQuery = "SELECT * FROM Product WHERE Visible = 1 ORDER BY SortNumber ASC;";
                         break;
                     case "3":
                         ProductInfo.RadioButtonFlg = 3;
-                        strSqlQuery = """SELECT * FROM Product WHERE Visible = 1 AND PrintType != 0 ORDER BY SortNumber ASC;""";
+                        strSqlQuery = "SELECT * FROM Product WHERE Visible = 1 AND PrintType != 0 ORDER BY SortNumber ASC;";
                         break;
                     case "4":
                         ProductInfo.RadioButtonFlg = 4;
-                        strSqlQuery = """SELECT * FROM Product WHERE Visible = 1 AND (PrintType = 5 OR PrintType = 6) ORDER BY SortNumber ASC;""";
+                        strSqlQuery = "SELECT * FROM Product WHERE Visible = 1 AND (PrintType = 5 OR PrintType = 6) ORDER BY SortNumber ASC;";
                         break;
                     default:
                         break;
@@ -612,7 +612,7 @@ namespace ProductDatabase {
         private void BarcodeInput() {
             using (OdbcConnection con = new("DSN=DSN_NAME; UID=USER_ID; PWD=REMOVED")) {
                 con.Open();
-                using OdbcCommand cmd = new($"""SELECT * FROM V_Orders WHERE 手配管理番号 = "{QRCodeTextBox.Text}" """, con);
+                using OdbcCommand cmd = new($"SELECT * FROM V_Orders WHERE 手配管理番号 = '{QRCodeTextBox.Text}';", con);
                 using var dr = cmd.ExecuteReader();
                 while (dr.Read()) {
                     ProductInfo.ExtSys1 = dr["手配製番"].ToString() ?? string.Empty;
@@ -639,22 +639,23 @@ namespace ProductDatabase {
             cmd.CommandText =
                 $"""
                 SELECT
-                    s."SubItemNumber",
+                    s.SubItemNumber,
                     s.SubstrateName,
                     s.ProductName AS sName,
                     p.ProductName AS pName,
                     p.ProductType,
-                    p."ProItemNumber"
+                    p.ProItemNumber
                 FROM
-                    "Substrate" AS s
+                    Substrate AS s
                 FULL JOIN
-                    "Product" AS p
+                    Product AS p
                 ON
-                    s."SubItemNumber" = p."ProItemNumber"
+                    s.SubItemNumber = p.ProItemNumber
                 WHERE
                     s.SubItemNumber LIKE '%'|| @StrExtSys2 ||'%'
                 OR
                     p.ProItemNumber LIKE '%'|| @StrExtSys2 ||'%'
+                ;
                 """;
 
             cmd.Parameters.Add("@StrExtSys2", DbType.String).Value = ProductInfo.ExtSys2;
@@ -708,7 +709,7 @@ namespace ProductDatabase {
         }
         private void HandleSubstrateSelection(string productName, string substrateName) {
             using (SQLiteConnection con = new(GetConnectionInformation())) {
-                using SQLiteDataAdapter adapter = new("""SELECT * FROM Substrate;""", con);
+                using SQLiteDataAdapter adapter = new("SELECT * FROM Substrate;", con);
                 adapter.Fill(ProductInfo.ProductDataTable);
             }
 
@@ -730,7 +731,7 @@ namespace ProductDatabase {
         }
         private void HandleProductSelection(string productName, string productType) {
             using (SQLiteConnection con = new(GetConnectionInformation())) {
-                using SQLiteDataAdapter adapter = new("""SELECT * FROM Product;""", con);
+                using SQLiteDataAdapter adapter = new("SELECT * FROM Product;", con);
                 adapter.Fill(ProductInfo.ProductDataTable);
             }
 
