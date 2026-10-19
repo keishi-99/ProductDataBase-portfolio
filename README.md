@@ -34,38 +34,6 @@
 
 ---
 
-## システム構成図
-
-3つのプロジェクトはコード上の参照関係を持たず、SQLite ファイル（`ProductRegistry.db`）を介して疎結合しています。Launcher はプロセス起動（`Process.Start`）で ProductDataBase を呼び出すだけで、アセンブリ参照はありません。
-
-```mermaid
-graph TB
-    subgraph Client["クライアント PC"]
-        Launcher["Launcher<br/>(net10.0-windows / WinForms)"]
-        ProductDataBase["ProductDataBase<br/>(net10.0-windows / WinForms)"]
-        bPac["Brother bPac SDK (COM)"]
-        ExcelInterop["Microsoft.Office.Interop.Excel (COM)"]
-        Printer[["Brother P-touch<br/>ラベルプリンタ"]]
-        Excel[["Microsoft Excel"]]
-    end
-
-    subgraph Storage["共有ストレージ"]
-        DB[("SQLite<br/>ProductRegistry.db")]
-    end
-
-    subgraph WebHost["Web ホスト (port 5009)"]
-        ProductWebViewer["ProductWebViewer<br/>(ASP.NET Core / net10.0)"]
-    end
-
-    Launcher -- "Process.Start" --> ProductDataBase
-    ProductDataBase -- "Dapper 読み書き" --> DB
-    ProductDataBase --> bPac --> Printer
-    ProductDataBase --> ExcelInterop --> Excel
-    ProductWebViewer -- "Dapper 読み取り" --> DB
-```
-
----
-
 ## 工夫した点
 
 - **3プロジェクトの疎結合構成** — Launcher / ProductDataBase / ProductWebViewer はアセンブリ参照を持たず、SQLite ファイルのみを介して連携し、プロジェクト間の依存を持たない構成
