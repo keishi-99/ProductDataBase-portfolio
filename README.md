@@ -68,8 +68,8 @@ graph TB
 
 ## 工夫した点
 
-- **3プロジェクトの疎結合構成** — Launcher / ProductDataBase / ProductWebViewer はアセンブリ参照を持たず、SQLite ファイルのみを介して連携。TFM が異なる（.NET 8 / .NET 10）プロジェクト間でも依存を持たずに済む構成
-- **ビットフラグ方式の印刷パターン設計** — `SerialPrintType` / `SheetPrintType` カラムを `SerialPrintTypeFlags` / `SheetPrintTypeFlags`（`[Flags]` enum）で解釈し、複数の印刷・付番パターンを1カラムで管理（詳細は `sql.md`）
+- **3プロジェクトの疎結合構成** — Launcher / ProductDataBase / ProductWebViewer はアセンブリ参照を持たず、SQLite ファイルのみを介して連携し、プロジェクト間の依存を持たない構成
+- **ビットフラグ方式の印刷パターン設計** — `SerialPrintType` / `SheetPrintType` カラムを `SerialPrintTypeFlags` / `SheetPrintTypeFlags`（`[Flags]` enum）で解釈し、複数の印刷・付番パターンを1カラムで管理
 - **Excel 帳票の自動生成** — テンプレートベースで成績書・チェックシート・一覧表・基板情報を自動出力
 - **多重起動防止・自動バックアップ・操作ログ** — Mutex によるプロセス制御、起動時 DB バックアップ（最大20件）、月別 CSV 操作ログ
 
@@ -93,7 +93,7 @@ graph TB
 
 ## セットアップ
 
-`Config/General/appsettings.json` を環境に合わせて編集します（テンプレート `Config/General/appsettings.template.json` を参照）。
+`Config/General/appsettings.json` を環境に合わせて編集します。
 
 ```json
 {
